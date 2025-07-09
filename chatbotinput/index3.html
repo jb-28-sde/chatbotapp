@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Chatbot - Ultra UI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .chat-wrapper {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      width: 420px;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-header {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 15px;
+      color: white;
+      text-align: center;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .chat-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .chat-message {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 15px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      animation: fadeIn 0.3s ease-in;
+    }
+
+    .chat-message.user {
+      background-color: #0084ff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+
+    .chat-message.robot {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+
+    .chat-footer {
+      display: flex;
+      padding: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .chat-footer input {
+      flex: 1;
+      padding: 12px 15px;
+      border-radius: 25px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .chat-footer button {
+      margin-left: 10px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      background-color: #0084ff;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
+
+    .chat-footer button:hover {
+      background-color: #005ecb;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Scrollbar */
+    .chat-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .chat-body::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="js-container"></div>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    const chatbot = {
+      getResponse: (msg) => {
+        const m = msg.toLowerCase();
+        if (m.includes('hi') || m.includes('hello')) return "Hello Jai 👋, how can I help you?";
+        if (m.includes('help')) return "Sure, I'm here to assist you 😊.";
+        return "Sorry, I didn’t understand that. Try something else.";
+      }
+    };
+  </script>
+
+  <script type="text/babel">
+    function ChatInput({ onSend }) {
+      const [input, setInput] = React.useState("");
+
+      function send() {
+        if (!input.trim()) return;
+        onSend(input.trim());
+        setInput("");
+      }
+
+      return (
+        <div className="chat-footer">
+          <input
+            type="text"
+            placeholder="Type something..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && send()}
+          />
+          <button onClick={send}>Send</button>
+        </div>
+      );
+    }
+
+    function ChatMessages({ messages }) {
+      const chatRef = React.useRef();
+
+      React.useEffect(() => {
+        chatRef.current.scrollTop = chatRef.current.scrollHeight;
+      }, [messages]);
+
+      return (
+        <div className="chat-body" ref={chatRef}>
+          {messages.map((msg) => (
+            <div key={msg.id} className={`chat-message ${msg.sender}`}>
+              {msg.message}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    function App() {
+      const [messages, setMessages] = React.useState([
+        { id: 1, message: "Hey there!", sender: "user" },
+        { id: 2, message: "Hi Jai 👋, how can I help you?", sender: "robot" },
+      ]);
+
+      function handleSend(userMsg) {
+        const newMsg = {
+          id: crypto.randomUUID(),
+          message: userMsg,
+          sender: "user",
+        };
+        setMessages((prev) => [...prev, newMsg]);
+
+        setTimeout(() => {
+          const botReply = chatbot.getResponse(userMsg);
+          const botMsg = {
+            id: crypto.randomUUID(),
+            message: botReply,
+            sender: "robot",
+          };
+          setMessages((prev) => [...prev, botMsg]);
+        }, 600);
+      }
+
+      return (
+        <div className="chat-wrapper">
+          <div className="chat-header">🤖 AI ChatBot</div>
+          <ChatMessages messages={messages} />
+          <ChatInput onSend={handleSend} />
+        </div>
+      );
+    }
+
+    const root = document.querySelector(".js-container");
+    ReactDOM.createRoot(root).render(<App />);
+  </script>
+</body>
+</html>

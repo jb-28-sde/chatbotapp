@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="js-container"></div>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+        function ChatInput() {
+            return (
+                <>
+                    <input type="text" placeholder="Write Your Message" />
+                    <button>Send</button>
+                </>
+            );
+        }
+        function ChatMessage({ message, sender }) {
+            return (
+                <>
+                    
+                    <div>
+                        {sender === 'robot' && (<img src="robot.png" width="50" />)}
+                        {message}
+                        {sender === 'user' && (<img src="user.png" width="50" />)}
+                    </div>
+                </>
+
+            )
+
+        }
+        function ChatMessages({chatMessages}) {
+            return(
+                <>
+                {chatMessages.map((chat)=>(
+                    <ChatMessage key={chat.id} message={chat.message} sender={chat.sender}/>
+                ))}
+                </>
+            )
+        }
+    //       
+
+        function App() {
+            const chatMessages = [
+                    { id: "1",message: "Hello Chatbot",sender: "user" },
+                    { id: "2",message: "Hey,Jai!", sender: "robot" },
+                    { id: "3",message: "can you help me", sender: "user" },
+                    { id: "4",message: "yeah,sure!",sender: "robot" },
+                    ]
+                return (
+                    <>
+                    <ChatInput/>
+                    <ChatMessages chatMessages={chatMessages}/>
+                    </>
+                )}
+                
+
+        let container = document.querySelector('.js-container')
+        ReactDOM.createRoot(container).render(<App />)
+    </script>
+</body>
+</html>
